@@ -34030,7 +34030,7 @@ async function try_artifact() {
   coreExports.debug('Extracting ' + downloadPath + '.zip');
   let extractedPath = await toolCacheExports.extractZip(downloadPath + '.zip');
   // Within there is a tar file, somewhere
-  const extractedBinary = fs.readdirSync(path.join(extractedPath, binDirName));
+  const extractedBinary = fs.readdirSync(extractedPath);
   const binaryName = extractedBinary[0];
 
   // Now extract tar of zip from there
