@@ -34039,7 +34039,7 @@ async function try_artifact() {
       ? await toolCacheExports.extractZip(binaryName)
       : await toolCacheExports.extractTar(binaryName);
   // Find binary inside path, move to binDir
-  await installFromDirectory(extractedPath, tagname);
+  await installFromDirectory(extractedPath, ourArtifact[0].digest);
   return true
 }
 

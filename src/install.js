@@ -133,6 +133,6 @@ export async function try_artifact() {
       ? await tc.extractZip(binaryName)
       : await tc.extractTar(binaryName)
   // Find binary inside path, move to binDir
-  await installFromDirectory(extractedPath, tagname)
+  await installFromDirectory(extractedPath, ourArtifact[0].digest)
   return true
 }
