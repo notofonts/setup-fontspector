@@ -6,7 +6,7 @@ const REPO_URL = 'https://github.com/fonttools/fontspector'
 export async function build(version, features) {
   // Let's make sure we have rustc / cargo installed
   let hasRust = true
-  exec('cargo --version', (error, stdout, stderr) => {
+  execSync('cargo --version', (error, stdout, stderr) => {
     if (error) {
       core.error(`Error running Cargo: ${error.message}`)
       hasRust = false
