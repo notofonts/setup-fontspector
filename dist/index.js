@@ -33826,10 +33826,13 @@ function systemPair() {
 
 async function install(wantedVersion) {
   const myToken = process.env.GITHUB_TOKEN;
-  if (!myToken) {
-    throw new Error('GITHUB_TOKEN is not set')
+  var octokit;
+  if (myToken) {
+    octokit = githubExports.getOctokit(myToken);
+  } else {
+    coreExports.warning('No GITHUB_TOKEN found. Using public API.');
+    octokit = githubExports.getOctokit('');
   }
-  const octokit = githubExports.getOctokit(myToken);
   const releases = await octokit.rest.repos.listReleases({
     owner: 'fonttools',
     repo: 'fontspector',
