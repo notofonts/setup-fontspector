@@ -3,7 +3,6 @@ import * as core from '@actions/core'
 import * as tc from '@actions/tool-cache'
 import * as path from 'path'
 import * as fs from 'fs'
-import { exec } from 'child_process'
 import { homedir } from 'os'
 
 const binDir = path.join(homedir(), '.fontspector', 'bin')
@@ -89,7 +88,7 @@ export async function install(wantedVersion) {
   const asset = relevantAssets[0]
   core.info(`Downloading ${asset.name}...`)
   const downloadUrl = asset.browser_download_url
-  core.info(`Download URL: ${downloadUrl}`)
+  core.debug(`Download URL: ${downloadUrl}`)
   const downloadPath = await tc.downloadTool(downloadUrl)
   if (!fs.existsSync(binDir)) {
     fs.mkdirSync(binDir, { recursive: true })
@@ -104,11 +103,11 @@ export async function install(wantedVersion) {
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
   const binDirName = directories[0]
-  core.info(`Binary directory name: ${binDirName}`)
+  core.debug(`Binary directory name: ${binDirName}`)
 
   const extractedBinary = fs.readdirSync(path.join(extractedPath, binDirName))
   const binaryName = extractedBinary[0]
-  core.info(`Binary name: ${binaryName}`)
+  core.debug(`Binary name: ${binaryName}`)
 
   const binaryPath = path.join(extractedPath, binDirName, binaryName)
   const newBinaryPath = path.join(binDir, binaryName)
@@ -119,13 +118,5 @@ export async function install(wantedVersion) {
     'fontspector',
     foundRelease.tag_name
   )
-  exec('find ~/.fontspector', (err, stdout, stderr) => {
-    core.info(`stdout: ${stdout}`)
-    core.info(`stderr: ${stderr}`)
-    if (err) {
-      core.error(`exec error: ${err}`)
-    }
-  })
-
   core.addPath(binDir)
 }

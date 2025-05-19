@@ -27,7 +27,7 @@ import require$$1$3 from 'url';
 import require$$3$2 from 'zlib';
 import require$$6 from 'string_decoder';
 import require$$0$9 from 'diagnostics_channel';
-import require$$2$3, { exec as exec$1 } from 'child_process';
+import require$$2$3 from 'child_process';
 import require$$6$1 from 'timers';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -33889,7 +33889,7 @@ async function install(wantedVersion) {
   const asset = relevantAssets[0];
   coreExports.info(`Downloading ${asset.name}...`);
   const downloadUrl = asset.browser_download_url;
-  coreExports.info(`Download URL: ${downloadUrl}`);
+  coreExports.debug(`Download URL: ${downloadUrl}`);
   const downloadPath = await toolCacheExports.downloadTool(downloadUrl);
   if (!fs.existsSync(binDir)) {
     fs.mkdirSync(binDir, { recursive: true });
@@ -33904,11 +33904,11 @@ async function install(wantedVersion) {
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name);
   const binDirName = directories[0];
-  coreExports.info(`Binary directory name: ${binDirName}`);
+  coreExports.debug(`Binary directory name: ${binDirName}`);
 
   const extractedBinary = fs.readdirSync(path.join(extractedPath, binDirName));
   const binaryName = extractedBinary[0];
-  coreExports.info(`Binary name: ${binaryName}`);
+  coreExports.debug(`Binary name: ${binaryName}`);
 
   const binaryPath = path.join(extractedPath, binDirName, binaryName);
   const newBinaryPath = path.join(binDir, binaryName);
@@ -33919,14 +33919,6 @@ async function install(wantedVersion) {
     'fontspector',
     foundRelease.tag_name
   );
-  exec$1('find ~/.fontspector', (err, stdout, stderr) => {
-    coreExports.info(`stdout: ${stdout}`);
-    coreExports.info(`stderr: ${stderr}`);
-    if (err) {
-      coreExports.error(`exec error: ${err}`);
-    }
-  });
-
   coreExports.addPath(binDir);
 }
 
