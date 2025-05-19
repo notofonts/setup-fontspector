@@ -45,8 +45,14 @@ jobs:
         run: npm run ci-test
 
   test-action:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
     name: GitHub Actions Test
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
