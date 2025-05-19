@@ -125,7 +125,7 @@ export async function try_artifact() {
   let extractedPath = await tc.extractZip(downloadPath + '.zip')
   // Within there is a tar file, somewhere
   const extractedBinary = fs.readdirSync(extractedPath)
-  const binaryName = extractedBinary[0]
+  const binaryName = path.join(extractedPath, extractedBinary[0])
 
   // Now extract tar of zip from there
   extractedPath =
