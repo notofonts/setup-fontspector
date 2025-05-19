@@ -1,6 +1,12 @@
 import * as github from '@actions/github'
 import * as core from '@actions/core'
 import * as tc from '@actions/tool-cache'
+import * as path from 'path'
+import * as fs from 'fs'
+import { exec } from 'child_process'
+import { homedir } from 'os'
+
+const binDir = path.join(homedir(), '.fontspector', 'bin')
 
 function systemPair() {
   // Get the system pair for the current platform and architecture
@@ -83,16 +89,43 @@ export async function install(wantedVersion) {
   const asset = relevantAssets[0]
   core.info(`Downloading ${asset.name}...`)
   const downloadUrl = asset.browser_download_url
-  core.debug(`Download URL: ${downloadUrl}`)
+  core.info(`Download URL: ${downloadUrl}`)
   const downloadPath = await tc.downloadTool(downloadUrl)
+  if (!fs.existsSync(binDir)) {
+    fs.mkdirSync(binDir, { recursive: true })
+  }
   const extractedPath =
     process.platform === 'win32'
       ? await tc.extractZip(downloadPath)
       : await tc.extractTar(downloadPath)
+  // Find binary inside path, move to binDir
+  const directories = fs
+    .readdirSync(extractedPath, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name)
+  const binDirName = directories[0]
+  core.info(`Binary directory name: ${binDirName}`)
+
+  const extractedBinary = fs.readdirSync(path.join(extractedPath, binDirName))
+  const binaryName = extractedBinary[0]
+  core.info(`Binary name: ${binaryName}`)
+
+  const binaryPath = path.join(extractedPath, binDirName, binaryName)
+  const newBinaryPath = path.join(binDir, binaryName)
+  fs.renameSync(binaryPath, newBinaryPath)
+
   const cachedPath = await tc.cacheDir(
-    extractedPath,
+    binDir,
     'fontspector',
     foundRelease.tag_name
   )
-  core.addPath(extractedPath)
+  exec('find ~/.fontspector', (err, stdout, stderr) => {
+    core.info(`stdout: ${stdout}`)
+    core.info(`stderr: ${stderr}`)
+    if (err) {
+      core.error(`exec error: ${err}`)
+    }
+  })
+
+  core.addPath(binDir)
 }
