@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { exec } from 'child_process'
+import { execSync } from 'child_process'
 
 const REPO_URL = 'https://github.com/fonttools/fontspector'
 
@@ -33,7 +33,7 @@ export async function build(version, features) {
   }
 
   core.info('Running ' + cargoCmd)
-  exec(cargoCmd, (error, stdout, stderr) => {
+  execSync(cargoCmd, (error, stdout, stderr) => {
     if (error) {
       core.error(`Error: ${error.message}`)
       return

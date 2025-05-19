@@ -27,7 +27,7 @@ import require$$1$3 from 'url';
 import require$$3$2 from 'zlib';
 import require$$6 from 'string_decoder';
 import require$$0$9 from 'diagnostics_channel';
-import require$$2$3, { exec as exec$1 } from 'child_process';
+import require$$2$3, { execSync } from 'child_process';
 import require$$6$1 from 'timers';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -25578,7 +25578,7 @@ function requirePathUtils () {
 
 var platform = {};
 
-var exec = {};
+var exec$1 = {};
 
 var toolrunner = {};
 
@@ -26712,28 +26712,28 @@ function requireToolrunner () {
 var hasRequiredExec;
 
 function requireExec () {
-	if (hasRequiredExec) return exec;
+	if (hasRequiredExec) return exec$1;
 	hasRequiredExec = 1;
-	var __createBinding = (exec && exec.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+	var __createBinding = (exec$1 && exec$1.__createBinding) || (Object.create ? (function(o, m, k, k2) {
 	    if (k2 === undefined) k2 = k;
 	    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 	}) : (function(o, m, k, k2) {
 	    if (k2 === undefined) k2 = k;
 	    o[k2] = m[k];
 	}));
-	var __setModuleDefault = (exec && exec.__setModuleDefault) || (Object.create ? (function(o, v) {
+	var __setModuleDefault = (exec$1 && exec$1.__setModuleDefault) || (Object.create ? (function(o, v) {
 	    Object.defineProperty(o, "default", { enumerable: true, value: v });
 	}) : function(o, v) {
 	    o["default"] = v;
 	});
-	var __importStar = (exec && exec.__importStar) || function (mod) {
+	var __importStar = (exec$1 && exec$1.__importStar) || function (mod) {
 	    if (mod && mod.__esModule) return mod;
 	    var result = {};
 	    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
 	    __setModuleDefault(result, mod);
 	    return result;
 	};
-	var __awaiter = (exec && exec.__awaiter) || function (thisArg, _arguments, P, generator) {
+	var __awaiter = (exec$1 && exec$1.__awaiter) || function (thisArg, _arguments, P, generator) {
 	    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
 	    return new (P || (P = Promise))(function (resolve, reject) {
 	        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -26742,8 +26742,8 @@ function requireExec () {
 	        step((generator = generator.apply(thisArg, _arguments || [])).next());
 	    });
 	};
-	Object.defineProperty(exec, "__esModule", { value: true });
-	exec.getExecOutput = exec.exec = void 0;
+	Object.defineProperty(exec$1, "__esModule", { value: true });
+	exec$1.getExecOutput = exec$1.exec = void 0;
 	const string_decoder_1 = require$$6;
 	const tr = __importStar(requireToolrunner());
 	/**
@@ -26756,7 +26756,7 @@ function requireExec () {
 	 * @param     options            optional exec options.  See ExecOptions
 	 * @returns   Promise<number>    exit code
 	 */
-	function exec$1(commandLine, args, options) {
+	function exec(commandLine, args, options) {
 	    return __awaiter(this, void 0, void 0, function* () {
 	        const commandArgs = tr.argStringToArray(commandLine);
 	        if (commandArgs.length === 0) {
@@ -26769,7 +26769,7 @@ function requireExec () {
 	        return runner.exec();
 	    });
 	}
-	exec.exec = exec$1;
+	exec$1.exec = exec;
 	/**
 	 * Exec a command and get the output.
 	 * Output will be streamed to the live console.
@@ -26803,7 +26803,7 @@ function requireExec () {
 	            }
 	        };
 	        const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-	        const exitCode = yield exec$1(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+	        const exitCode = yield exec(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
 	        //flush any remaining characters
 	        stdout += stdoutDecoder.end();
 	        stderr += stderrDecoder.end();
@@ -26814,9 +26814,9 @@ function requireExec () {
 	        };
 	    });
 	}
-	exec.getExecOutput = getExecOutput;
+	exec$1.getExecOutput = getExecOutput;
 	
-	return exec;
+	return exec$1;
 }
 
 var hasRequiredPlatform;
@@ -27282,7 +27282,7 @@ const REPO_URL = 'https://github.com/fonttools/fontspector';
 async function build(version, features) {
   // Let's make sure we have rustc / cargo installed
   let hasRust = true;
-  exec$1('cargo --version', (error, stdout, stderr) => {
+  exec('cargo --version', (error, stdout, stderr) => {
     if (error) {
       coreExports.error(`Error running Cargo: ${error.message}`);
       hasRust = false;
@@ -27309,7 +27309,7 @@ async function build(version, features) {
   }
 
   coreExports.info('Running ' + cargoCmd);
-  exec$1(cargoCmd, (error, stdout, stderr) => {
+  execSync(cargoCmd, (error, stdout, stderr) => {
     if (error) {
       coreExports.error(`Error: ${error.message}`);
       return
