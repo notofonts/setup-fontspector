@@ -7,7 +7,7 @@ Use this template to install Fontspector in your Github Actions Workflow:
 
 ```yaml
   - name: Install fontspector
-    uses: notofonts/setup-fontspector
+    uses: notofonts/setup-fontspector@main
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -17,7 +17,7 @@ choose a specific release:
 
 ```yaml
   - name: Install fontspector
-    uses: notofonts/setup-fontspector
+    uses: notofonts/setup-fontspector@main
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     with:
@@ -34,7 +34,7 @@ or you can build from source either by request a "head" version:
       repo-token: ${{ secrets.GITHUB_TOKEN }}
 
   - name: Install fontspector
-    uses: notofonts/setup-fontspector
+    uses: notofonts/setup-fontspector@main
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     with:
@@ -51,7 +51,7 @@ or requesting any non-default features you would like to build (as a space separ
       repo-token: ${{ secrets.GITHUB_TOKEN }}
 
   - name: Install fontspector
-    uses: notofonts/setup-fontspector
+    uses: notofonts/setup-fontspector@main
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     with:
