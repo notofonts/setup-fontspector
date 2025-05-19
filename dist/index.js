@@ -33912,7 +33912,7 @@ async function install(wantedVersion) {
 
   const binaryPath = path.join(extractedPath, binDirName, binaryName);
   const newBinaryPath = path.join(binDir, binaryName);
-  fs.renameSync(binaryPath, newBinaryPath);
+  fs.copyFileSync(binaryPath, newBinaryPath);
 
   await toolCacheExports.cacheDir(
     binDir,
