@@ -58,3 +58,6 @@ jobs:
         uses: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Ensure fontspector is installed
+        run: fontspector --version
