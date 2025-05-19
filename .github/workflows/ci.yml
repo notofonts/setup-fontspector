@@ -56,3 +56,5 @@ jobs:
       - name: Test Local Action
         id: test-action
         uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

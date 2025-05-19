@@ -33830,8 +33830,7 @@ async function install(wantedVersion) {
   if (myToken) {
     octokit = githubExports.getOctokit(myToken);
   } else {
-    coreExports.warning('No GITHUB_TOKEN found. Using public API.');
-    octokit = githubExports.getOctokit('');
+    coreExports.error('No GITHUB_TOKEN found');
   }
   const releases = await octokit.rest.repos.listReleases({
     owner: 'fonttools',
