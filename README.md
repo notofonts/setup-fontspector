@@ -32,7 +32,7 @@ or you can get a recent binary build artefact by requesting a "head" version:
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   with:
-    version: 1.0.1
+    version: head
 ```
 
 or you can build from source by requesting any non-default features you would
