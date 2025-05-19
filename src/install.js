@@ -94,5 +94,5 @@ export async function install(wantedVersion) {
     'fontspector',
     foundRelease.tag_name
   )
-  core.addPath(cachedPath)
+  core.addPath(extractedPath)
 }

@@ -33891,12 +33891,12 @@ async function install(wantedVersion) {
     process.platform === 'win32'
       ? await toolCacheExports.extractZip(downloadPath)
       : await toolCacheExports.extractTar(downloadPath);
-  const cachedPath = await toolCacheExports.cacheDir(
+  await toolCacheExports.cacheDir(
     extractedPath,
     'fontspector',
     foundRelease.tag_name
   );
-  coreExports.addPath(cachedPath);
+  coreExports.addPath(extractedPath);
 }
 
 /**
