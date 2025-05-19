@@ -50,16 +50,24 @@ export async function install(wantedVersion) {
   const asset = relevantAssets[0]
   core.info(`Downloading ${asset.name}...`)
   const downloadUrl = asset.browser_download_url
+  return installFromUrl(downloadUrl, foundRelease.tag_name)
+}
+
+async function installFromUrl(downloadUrl, tagname) {
   core.debug(`Download URL: ${downloadUrl}`)
   const downloadPath = await tc.downloadTool(downloadUrl)
-  if (!fs.existsSync(binDir)) {
-    fs.mkdirSync(binDir, { recursive: true })
-  }
   const extractedPath =
     process.platform === 'win32'
       ? await tc.extractZip(downloadPath)
       : await tc.extractTar(downloadPath)
   // Find binary inside path, move to binDir
+  return installFromDirectory(extractedPath, tagname)
+}
+
+async function installFromDirectory(extractedPath, tagname) {
+  if (!fs.existsSync(binDir)) {
+    fs.mkdirSync(binDir, { recursive: true })
+  }
   const directories = fs
     .readdirSync(extractedPath, { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
@@ -75,10 +83,52 @@ export async function install(wantedVersion) {
   const newBinaryPath = path.join(binDir, binaryName)
   fs.copyFileSync(binaryPath, newBinaryPath)
 
-  const cachedPath = await tc.cacheDir(
-    binDir,
-    'fontspector',
-    foundRelease.tag_name
-  )
+  const cachedPath = await tc.cacheDir(binDir, 'fontspector', tagname)
   core.addPath(binDir)
+}
+
+export async function try_artifact() {
+  const myToken = process.env.GITHUB_TOKEN
+  if (!myToken) {
+    throw new Error(
+      'No GITHUB_TOKEN found; set GITHUB_TOKEN in your environment'
+    )
+  }
+  const octokit = github.getOctokit(myToken)
+  const artifacts = await octokit.rest.actions.listArtifactsForRepo({
+    owner: 'fonttools',
+    repo: 'fontspector',
+    per_page: 100
+  })
+  let ourArtifact = artifacts.data.artifacts.filter(
+    (asset) =>
+      asset.name.startsWith('fontspector-') && asset.name.includes(systemPair())
+  )
+  if (ourArtifact.length === 0) {
+    core.info(`No artifacts found for ${systemPair()}, building from source`)
+    return false
+  }
+  core.info(`Found artifact ${ourArtifact[0].name}, downloading...`)
+  let other_url = await octokit.rest.actions.downloadArtifact({
+    owner: 'fonttools',
+    repo: 'fontspector',
+    artifact_id: ourArtifact[0].id,
+    archive_format: 'zip'
+  })
+  // Gives redirect URL
+  core.debug(`Artifact URL: ${other_url.url}`)
+  //installFromUrl(other_url.url, ourArtifact[0].digest, 'zip')
+  const downloadPath = await tc.downloadTool(other_url.url)
+  // Rename to .zip
+  fs.renameSync(downloadPath, downloadPath + '.zip')
+  core.debug('Extracting ' + downloadPath + '.zip')
+  let extractedPath = await tc.extractZip(downloadPath + '.zip')
+  // Now extract tar of zip from there
+  extractedPath =
+    process.platform === 'win32'
+      ? await tc.extractZip(extractedPath)
+      : await tc.extractTar(extractedPath)
+  // Find binary inside path, move to binDir
+  await installFromDirectory(extractedPath, tagname)
+  return true
 }

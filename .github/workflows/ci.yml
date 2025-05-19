@@ -56,7 +56,7 @@ jobs:
           - version: 'latest'
             features: '' # Should get the binary
           - version: 'head'
-            features: ''
+            features: '' # Should try an artefact
           - version: '' # Should build from source
             features: 'duckdb'
           # Currently releases aren't building because a dependency got yanked...

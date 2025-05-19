@@ -28,7 +28,6 @@ export async function resolveVersion(version) {
   var releases = await latestReleases()
   if (version === 'latest' || !version) {
     core.info('Using latest version')
-    core.debug(JSON.stringify(releases[0]))
     return releases[0]
   }
   // Check if the wanted version is a valid version string

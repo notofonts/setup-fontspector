@@ -33889,7 +33889,6 @@ async function resolveVersion(version) {
   var releases = await latestReleases();
   if (version === 'latest' || !version) {
     coreExports.info('Using latest version');
-    coreExports.debug(JSON.stringify(releases[0]));
     return releases[0]
   }
   // Check if the wanted version is a valid version string
@@ -33957,16 +33956,24 @@ async function install(wantedVersion) {
   const asset = relevantAssets[0];
   coreExports.info(`Downloading ${asset.name}...`);
   const downloadUrl = asset.browser_download_url;
+  return installFromUrl(downloadUrl, foundRelease.tag_name)
+}
+
+async function installFromUrl(downloadUrl, tagname) {
   coreExports.debug(`Download URL: ${downloadUrl}`);
   const downloadPath = await toolCacheExports.downloadTool(downloadUrl);
-  if (!fs.existsSync(binDir)) {
-    fs.mkdirSync(binDir, { recursive: true });
-  }
   const extractedPath =
     process.platform === 'win32'
       ? await toolCacheExports.extractZip(downloadPath)
       : await toolCacheExports.extractTar(downloadPath);
   // Find binary inside path, move to binDir
+  return installFromDirectory(extractedPath, tagname)
+}
+
+async function installFromDirectory(extractedPath, tagname) {
+  if (!fs.existsSync(binDir)) {
+    fs.mkdirSync(binDir, { recursive: true });
+  }
   const directories = fs
     .readdirSync(extractedPath, { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
@@ -33982,12 +33989,54 @@ async function install(wantedVersion) {
   const newBinaryPath = path.join(binDir, binaryName);
   fs.copyFileSync(binaryPath, newBinaryPath);
 
-  await toolCacheExports.cacheDir(
-    binDir,
-    'fontspector',
-    foundRelease.tag_name
-  );
+  await toolCacheExports.cacheDir(binDir, 'fontspector', tagname);
   coreExports.addPath(binDir);
+}
+
+async function try_artifact() {
+  const myToken = process.env.GITHUB_TOKEN;
+  if (!myToken) {
+    throw new Error(
+      'No GITHUB_TOKEN found; set GITHUB_TOKEN in your environment'
+    )
+  }
+  const octokit = githubExports.getOctokit(myToken);
+  const artifacts = await octokit.rest.actions.listArtifactsForRepo({
+    owner: 'fonttools',
+    repo: 'fontspector',
+    per_page: 100
+  });
+  let ourArtifact = artifacts.data.artifacts.filter(
+    (asset) =>
+      asset.name.startsWith('fontspector-') && asset.name.includes(systemPair())
+  );
+  if (ourArtifact.length === 0) {
+    coreExports.info(`No artifacts found for ${systemPair()}, building from source`);
+    return false
+  }
+  coreExports.info(`Found artifact ${ourArtifact[0].name}, downloading...`);
+  let other_url = await octokit.rest.actions.downloadArtifact({
+    owner: 'fonttools',
+    repo: 'fontspector',
+    artifact_id: ourArtifact[0].id,
+    archive_format: 'zip'
+  });
+  // Gives redirect URL
+  coreExports.debug(`Artifact URL: ${other_url.url}`);
+  //installFromUrl(other_url.url, ourArtifact[0].digest, 'zip')
+  const downloadPath = await toolCacheExports.downloadTool(other_url.url);
+  // Rename to .zip
+  fs.renameSync(downloadPath, downloadPath + '.zip');
+  coreExports.debug('Extracting ' + downloadPath + '.zip');
+  let extractedPath = await toolCacheExports.extractZip(downloadPath + '.zip');
+  // Now extract tar of zip from there
+  extractedPath =
+    process.platform === 'win32'
+      ? await toolCacheExports.extractZip(extractedPath)
+      : await toolCacheExports.extractTar(extractedPath);
+  // Find binary inside path, move to binDir
+  await installFromDirectory(extractedPath, tagname);
+  return true
 }
 
 /**
@@ -34006,6 +34055,11 @@ async function _run(version, features) {
   try {
     // Are we doing a source build?
     var source_build = false;
+    if (version == 'head' && !features) {
+      if (await try_artifact()) {
+        return
+      }
+    }
     if (version == 'head' || features) {
       coreExports.info('Building from source');
       source_build = true;

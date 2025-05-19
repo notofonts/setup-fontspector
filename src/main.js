@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import { build } from './build.js'
-import { install } from './install.js'
+import { install, try_artifact } from './install.js'
 
 /**
  * The main function for the action.
@@ -18,6 +18,11 @@ export async function _run(version, features) {
   try {
     // Are we doing a source build?
     var source_build = false
+    if (version == 'head' && !features) {
+      if (await try_artifact()) {
+        return
+      }
+    }
     if (version == 'head' || features) {
       core.info('Building from source')
       source_build = true
