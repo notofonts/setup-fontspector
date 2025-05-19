@@ -51,6 +51,14 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
+        options:
+          - version: 'latest'
+            features: '' # Should get the binary
+          - version: 'head'
+            features: ''
+          - version: '' # Should build from source
+            features: 'duckdb'
+          # Currently releases aren't building because a dependency got yanked...
     name: GitHub Actions Test
     runs-on: ${{ matrix.os }}
 
@@ -62,6 +70,9 @@ jobs:
       - name: Test Local Action
         id: test-action
         uses: ./
+        with:
+          version: ${{ matrix.options.version }}
+          features: ${{ matrix.options.features }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

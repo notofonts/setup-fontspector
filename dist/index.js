@@ -27,7 +27,7 @@ import require$$1$3 from 'url';
 import require$$3$2 from 'zlib';
 import require$$6 from 'string_decoder';
 import require$$0$9 from 'diagnostics_channel';
-import require$$2$3 from 'child_process';
+import require$$2$3, { exec as exec$1 } from 'child_process';
 import require$$6$1 from 'timers';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -27277,8 +27277,45 @@ function requireCore () {
 
 var coreExports = requireCore();
 
+const REPO_URL = 'https://github.com/fonttools/fontspector';
+
 async function build(version, features) {
-  coreExports.error('Build not implemented yet');
+  // Let's make sure we have Rust
+  const rustup = process.env.RUSTUP_HOME;
+  if (!rustup) {
+    coreExports.error('No RUSTUP_HOME found');
+    coreExports.setFailed(
+      'No RUSTUP_HOME found; use actions-rust-lang/setup-rust-toolchain@v1 first'
+    );
+    return
+  }
+
+  let cargoCmd = 'cargo install ';
+  if (features) {
+    cargoCmd += `--features "${features}" `;
+  }
+
+  if (version == 'head') {
+    cargoCmd += '--git ' + REPO_URL;
+  } else if (version == 'latest' || !version) {
+    coreExports.info('Using latest version');
+    cargoCmd += 'fontspector';
+  } else {
+    cargoCmd += 'fontspector --version ' + version;
+  }
+
+  coreExports.info('Running ' + cargoCmd);
+  exec$1(cargoCmd, (error, stdout, stderr) => {
+    if (error) {
+      coreExports.error(`Error: ${error.message}`);
+      return
+    }
+    if (stderr) {
+      coreExports.error(`stderr: ${stderr}`);
+      return
+    }
+    coreExports.debug(`stdout: ${stdout}`);
+  });
 }
 
 var github = {};
@@ -33806,6 +33843,57 @@ function requireToolCache () {
 
 var toolCacheExports = requireToolCache();
 
+async function latestReleases() {
+  const myToken = process.env.GITHUB_TOKEN;
+  if (!myToken) {
+    throw new Error(
+      'No GITHUB_TOKEN found; set GITHUB_TOKEN in your environment'
+    )
+  }
+  const octokit = githubExports.getOctokit(myToken);
+  const releases = await octokit.rest.repos.listReleases({
+    owner: 'fonttools',
+    repo: 'fontspector',
+    per_page: 100
+  });
+  if (releases.status !== 200) {
+    throw new Error('Failed to get latest version')
+  }
+
+  // We're only interested in releases of the CLI
+  return releases.data.filter((release) =>
+    release.tag_name.startsWith('fontspector-v')
+  )
+}
+
+async function resolveVersion(version) {
+  var releases = await latestReleases();
+  if (version === 'latest' || !version) {
+    coreExports.info('Using latest version');
+    coreExports.debug(JSON.stringify(releases[0]));
+    return releases[0]
+  }
+  // Check if the wanted version is a valid version string
+  const versionRegex = /^(\d+\.\d+\.\d+)$/;
+  const match = version.match(versionRegex);
+  coreExports.debug(`Wanted version: '${version}'`);
+  if (!match) {
+    throw new Error('Invalid version format. Use "X.Y.Z"')
+  }
+  // Narrow down cliReleases to the wanted version
+  releases = releases.filter((release) =>
+    release.tag_name.startsWith(`fontspector-v${version}`)
+  );
+  if (releases.length === 0) {
+    throw new Error(
+      `Version ${version} not found. Available versions: ${releases
+        .map((release) => release.tag_name)
+        .join(', ')}`
+    )
+  }
+  return releases[0]
+}
+
 const binDir = path.join(homedir(), '.fontspector', 'bin');
 
 function systemPair() {
@@ -33831,46 +33919,7 @@ function systemPair() {
 }
 
 async function install(wantedVersion) {
-  const myToken = process.env.GITHUB_TOKEN;
-  var octokit;
-  if (myToken) {
-    octokit = githubExports.getOctokit(myToken);
-  } else {
-    coreExports.error('No GITHUB_TOKEN found');
-  }
-  const releases = await octokit.rest.repos.listReleases({
-    owner: 'fonttools',
-    repo: 'fontspector',
-    per_page: 100
-  });
-  if (releases.status !== 200) {
-    throw new Error('Failed to get latest version')
-  }
-
-  // We're only interested in releases of the CLI
-  let cliReleases = releases.data.filter((release) =>
-    release.tag_name.startsWith('fontspector-v')
-  );
-
-  if (wantedVersion && wantedVersion !== 'latest') {
-    // Check if the wanted version is a valid version string
-    const versionRegex = /^(\d+\.\d+\.\d+)$/;
-    const match = wantedVersion.match(versionRegex);
-    coreExports.debug(`Wanted version: '${wantedVersion}'`);
-    if (!match) {
-      throw new Error('Invalid version format. Use "X.Y.Z"')
-    }
-    // Narrow down cliReleases to the wanted version
-    cliReleases = cliReleases.filter((release) =>
-      release.tag_name.startsWith(`fontspector-v${wantedVersion}`)
-    );
-  }
-
-  if (!cliReleases) {
-    throw new Error(`No releases found for version ${wantedVersion}`)
-  }
-
-  let foundRelease = cliReleases[0];
+  let foundRelease = resolveVersion(wantedVersion);
 
   // Install the specified version of the tool
   coreExports.info(`Installing ${foundRelease.name}...`);
