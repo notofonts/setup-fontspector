@@ -33923,7 +33923,7 @@ function systemPair() {
 }
 
 async function install(wantedVersion) {
-  let foundRelease = resolveVersion(wantedVersion);
+  let foundRelease = await resolveVersion(wantedVersion);
 
   // Install the specified version of the tool
   coreExports.info(`Installing ${foundRelease.name}...`);

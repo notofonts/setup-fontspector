@@ -31,7 +31,7 @@ function systemPair() {
 }
 
 export async function install(wantedVersion) {
-  let foundRelease = resolveVersion(wantedVersion)
+  let foundRelease = await resolveVersion(wantedVersion)
 
   // Install the specified version of the tool
   core.info(`Installing ${foundRelease.name}...`)
