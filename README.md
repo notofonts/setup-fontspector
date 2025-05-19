@@ -41,8 +41,8 @@ or you can get a recent binary build artefact by requesting a "head" version:
     version: 1.0.1
 ```
 
-or you can build from source by requesting any non-default features you would like to build 
-(as a space separated list)
+or you can build from source by requesting any non-default features you would
+like to build (as a space separated list)
 
 ```yaml
 # Needed for source build
