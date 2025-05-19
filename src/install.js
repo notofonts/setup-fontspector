@@ -7,13 +7,15 @@ function systemPair() {
   const platform = process.platform
   let arch = process.arch
   let newPlatform = ''
+  if (arch === 'x64') {
+    arch = 'x86_64'
+  } else if (arch === 'arm64') {
+    arch = 'aarch64'
+  }
   if (platform === 'linux') {
     newPlatform = 'linux-gnu'
   } else if (platform === 'darwin') {
     newPlatform = 'apple-darwin'
-    if (arch === 'arm64') {
-      arch = 'aarch64'
-    }
   } else if (platform === 'win32') {
     newPlatform = 'pc-windows-gnu'
   } else {
