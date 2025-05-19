@@ -123,11 +123,15 @@ export async function try_artifact() {
   fs.renameSync(downloadPath, downloadPath + '.zip')
   core.debug('Extracting ' + downloadPath + '.zip')
   let extractedPath = await tc.extractZip(downloadPath + '.zip')
+  // Within there is a tar file, somewhere
+  const extractedBinary = fs.readdirSync(path.join(extractedPath, binDirName))
+  const binaryName = extractedBinary[0]
+
   // Now extract tar of zip from there
   extractedPath =
     process.platform === 'win32'
-      ? await tc.extractZip(extractedPath)
-      : await tc.extractTar(extractedPath)
+      ? await tc.extractZip(binaryName)
+      : await tc.extractTar(binaryName)
   // Find binary inside path, move to binDir
   await installFromDirectory(extractedPath, tagname)
   return true
