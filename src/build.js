@@ -4,13 +4,17 @@ import { exec } from 'child_process'
 const REPO_URL = 'https://github.com/fonttools/fontspector'
 
 export async function build(version, features) {
-  // Let's make sure we have Rust
-  const rustup = process.env.RUSTUP_HOME
-  if (!rustup) {
-    core.error('No RUSTUP_HOME found')
-    core.setFailed(
-      'No RUSTUP_HOME found; use actions-rust-lang/setup-rust-toolchain@v1 first'
-    )
+  // Let's make sure we have rustc / cargo installed
+  let hasRust = true
+  exec('cargo --version', (error, stdout, stderr) => {
+    if (error) {
+      core.error(`Error running Cargo: ${error.message}`)
+      hasRust = false
+      return
+    }
+  })
+  if (!hasRust) {
+    core.error('Cargo is not installed. Cannot build from source without Rust.')
     return
   }
 

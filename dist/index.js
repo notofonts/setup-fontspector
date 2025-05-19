@@ -27280,13 +27280,17 @@ var coreExports = requireCore();
 const REPO_URL = 'https://github.com/fonttools/fontspector';
 
 async function build(version, features) {
-  // Let's make sure we have Rust
-  const rustup = process.env.RUSTUP_HOME;
-  if (!rustup) {
-    coreExports.error('No RUSTUP_HOME found');
-    coreExports.setFailed(
-      'No RUSTUP_HOME found; use actions-rust-lang/setup-rust-toolchain@v1 first'
-    );
+  // Let's make sure we have rustc / cargo installed
+  let hasRust = true;
+  exec$1('cargo --version', (error, stdout, stderr) => {
+    if (error) {
+      coreExports.error(`Error running Cargo: ${error.message}`);
+      hasRust = false;
+      return
+    }
+  });
+  if (!hasRust) {
+    coreExports.error('Cargo is not installed. Cannot build from source without Rust.');
     return
   }
 
