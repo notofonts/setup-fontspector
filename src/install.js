@@ -13,7 +13,7 @@ function systemPair() {
     arch = 'aarch64'
   }
   if (platform === 'linux') {
-    newPlatform = 'linux-gnu'
+    newPlatform = 'unknown-linux-gnu'
   } else if (platform === 'darwin') {
     newPlatform = 'apple-darwin'
   } else if (platform === 'win32') {
