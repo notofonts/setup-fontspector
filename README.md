@@ -27,12 +27,6 @@ choose a specific release:
 or you can get a recent binary build artefact by requesting a "head" version:
 
 ```yaml
-# Needed for source build
-- uses: actions-rust-lang/setup-rust-toolchain@v1
-- uses: arduino/setup-protoc@v3
-  with:
-    repo-token: ${{ secrets.GITHUB_TOKEN }}
-
 - name: Install fontspector
   uses: notofonts/setup-fontspector@main
   env:
