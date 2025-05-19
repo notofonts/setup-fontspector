@@ -6,55 +6,56 @@
 Use this template to install Fontspector in your Github Actions Workflow:
 
 ```yaml
-  - name: Install fontspector
-    uses: notofonts/setup-fontspector@main
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+- name: Install fontspector
+  uses: notofonts/setup-fontspector@main
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 By default, this installs the latest released version as a binary. You may also
 choose a specific release:
 
 ```yaml
-  - name: Install fontspector
-    uses: notofonts/setup-fontspector@main
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      version: 1.0.1
+- name: Install fontspector
+  uses: notofonts/setup-fontspector@main
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  with:
+    version: 1.0.1
 ```
 
-or you can build from source either by request a "head" version:
+or you can get a recent binary build artefact by requesting a "head" version:
 
 ```yaml
-  # Needed for source build
-  - uses: actions-rust-lang/setup-rust-toolchain@v1
-  - uses: arduino/setup-protoc@v3
-    with:
-      repo-token: ${{ secrets.GITHUB_TOKEN }}
+# Needed for source build
+- uses: actions-rust-lang/setup-rust-toolchain@v1
+- uses: arduino/setup-protoc@v3
+  with:
+    repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-  - name: Install fontspector
-    uses: notofonts/setup-fontspector@main
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      version: 1.0.1
+- name: Install fontspector
+  uses: notofonts/setup-fontspector@main
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  with:
+    version: 1.0.1
 ```
 
-or requesting any non-default features you would like to build (as a space separated list)
+or you can build from source by requesting any non-default features you would like to build 
+(as a space separated list)
 
 ```yaml
-  # Needed for source build
-  - uses: actions-rust-lang/setup-rust-toolchain@v1
-  - uses: arduino/setup-protoc@v3
-    with:
-      repo-token: ${{ secrets.GITHUB_TOKEN }}
+# Needed for source build
+- uses: actions-rust-lang/setup-rust-toolchain@v1
+- uses: arduino/setup-protoc@v3
+  with:
+    repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-  - name: Install fontspector
-    uses: notofonts/setup-fontspector@main
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      version: latest
-      features: python duckdb
+- name: Install fontspector
+  uses: notofonts/setup-fontspector@main
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  with:
+    version: latest
+    features: python duckdb
 ```
